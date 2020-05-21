@@ -1,6 +1,7 @@
 import {Request,Response} from "express";
 
 import {Category, ICategory} from "../models/category.model";
+import { ObjectID} from  "mongodb";
 import {LanguageService} from "../services/language.service";
 
 import { MongooseDocument } from "mongoose";
@@ -38,6 +39,26 @@ export class CategoryService extends CategoryHelpers{
     public getAllWLanguage(req:Request, res:Response){
 
         Category.aggregate([{
+            "$lookup":{
+                from: "languages",
+                localField:"_id",
+                foreignField:"category",
+                as: "l"
+            }
+        }],(err:Error,data:any)=>{
+            if(err){
+                res.status(401).send(err);
+            }else{
+                res.status(200).json(data);
+            }
+        })
+
+    }
+
+    public getGo(req:Request, res:Response){
+
+        Category.aggregate([
+            { $match: {_id : new ObjectID(req.params.id)},
             "$lookup":{
                 from: "languages",
                 localField:"_id",
